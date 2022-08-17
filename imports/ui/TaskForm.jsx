@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { TasksCollection } from '/imports/api/TasksCollection';
 
-export const TaskForm = () => {
+export const TaskForm = ({ user }) => {
+  const [text, setText] = useState('');
 
-    const [text, setText] = useState('');
+  const handleSubmit = e => {
+    e.preventDefault();
 
-    const handleSubmit = e => {
-        e.preventDefault();
+    if (!text) return;
 
-        if (!text) return;
+    TasksCollection.insert({
+      text: text.trim(),
+      createdAt: new Date(),
+      userId: user._id
+    });
 
-        TasksCollection.insert({
-            text: text.trim(),
-            createdAt: new Date()
-        })
-        setText("");
-    }
+    setText('');
+  };
 
     const handleTaskText = (e) => {
         setText(e.target.value);

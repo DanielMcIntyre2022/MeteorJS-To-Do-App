@@ -6,7 +6,9 @@ import { Task } from './Task';
 import { TaskForm } from './TaskForm';
 import { LoginForm } from './LoginForm';
 
-const toggleChecked = ({ _id, isChecked }) => {
+export const App = () => {
+
+  const toggleChecked = ({ _id, isChecked }) => {
   TasksCollection.update(_id, {
     $set: {
       isChecked: !isChecked
@@ -16,34 +18,43 @@ const toggleChecked = ({ _id, isChecked }) => {
 
 const deleteTask = ({ _id }) => TasksCollection.remove(_id);
 
-export const App = () => {
-
 const user = useTracker(() => Meteor.user());
 
 const [hideCompleted, setHideCompleted] = useState(false);
 
-const hideCompletedFilter = { isChecked: { $ne: true } };
+  const hideCompletedFilter = { isChecked: { $ne: true } };
 
-const pendingTasksCount = useTracker(() => {
-  TasksCollection.find(hideCompletedFilter).count()
-})
+    const userFilter = user ? { userId: user._id } : {};
 
- const pendingTasksTitle = `${
-    pendingTasksCount ? ` (${pendingTasksCount})` : ''
-  }`;
+    const pendingOnlyFilter = { ...hideCompletedFilter, ...userFilter };
 
-   const tasks = useTracker(() =>
-    TasksCollection.find(hideCompleted ? hideCompletedFilter : {}, {
-      sort: { createdAt: -1 },
-    }).fetch()
-  );
+    const tasks = useTracker(() => {
+      if (!user) {
+        return [];
+      }
+
+      return TasksCollection.find(
+        hideCompleted ? pendingOnlyFilter : userFilter,
+        {
+          sort: { createdAt: -1 },
+        }
+      ).fetch();
+    });
+
+    const pendingTasksCount = useTracker(() => {
+      if (!user) {
+        return 0;
+      }
+
+      return TasksCollection.find(pendingOnlyFilter).count();
+    });
   
   return (
     <div className="app">
       <header>
         <div className="app-bar">
           <div className="app-header">
-            <h1>Welcome to Meteor!{pendingTasksTitle}</h1>
+            <h1>Welcome to Meteor!{pendingTasksCount}</h1>
           </div>
         </div>
       </header>
