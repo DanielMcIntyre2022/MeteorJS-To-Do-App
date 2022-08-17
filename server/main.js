@@ -13,7 +13,6 @@ Meteor.startup(() => {
       'Fifth Task',
       'Sixth Task',
       'Seventh Task',
-      'New'
     ].forEach(insertTask)
   }
 });
